@@ -42,12 +42,12 @@ StelModule* DynamicPluginTemplatePluginInterface::getStelModule() const
 StelPluginInfo DynamicPluginTemplatePluginInterface::getPluginInfo() const
 {
 	StelPluginInfo info;
-	info.id = "DynamicPluginTemplate";
-	info.displayedName = N_("Dynamic Plugin Template");
-	info.authors = "Kirill Snezhko, Alexander Wolf";
-	info.contact = "stellarium@googlegroups.com";
-	info.description = N_("Startpoint for the dynamic plugin development.");    
-	info.acknowledgements = N_("Optional acknowledgements...");
+    info.id = "DynamicPluginTemplate";
+    info.displayedName = N_("Serial Telescope Alt Az Control");
+    info.authors = "TTA21";
+    info.contact = "";
+    info.description = N_("Serial Control Panel for a custom alt az mount.");
+    info.acknowledgements = N_("");
 	info.version = DYNAMICPLUGINTEMPLATE_VERSION;
 	info.license = DYNAMICPLUGINTEMPLATE_LICENSE;
 	return info;
@@ -106,8 +106,11 @@ void DynamicPluginTemplate::deinit()
 *************************************************************************/
 void DynamicPluginTemplate::draw(StelCore* core)
 {
-	StelPainter painter(core->getProjection2d());
+    /*StelPainter painter(core->getProjection2d());
 	painter.setColor(1,1,1,1);
 	painter.setFont(font);
-	painter.drawText(300, 300, "Hello, Dynamic World!");
+    painter.drawText(300, 300, "Hello, Dynamic World!");*/
+
+    StelPainter painter(core->getProjection(StelCore::FrameAltAz));
+    mainWindow->drawReticleSensor(core, painter);
 }

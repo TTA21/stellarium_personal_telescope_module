@@ -1,0 +1,32 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/src",
+                "${workspaceFolder}/src/gui",
+                "${workspaceFolder}/build/src",
+                "/home/tta21/Documents/work/stellarium/src",
+                "/home/tta21/Documents/work/stellarium/src/core",
+                "/home/tta21/Documents/work/stellarium/src/core/modules",
+                "/home/tta21/Documents/work/stellarium/src/core/planetsephems",
+                "/home/tta21/Documents/work/stellarium/src/gui",
+                "/home/tta21/Documents/work/stellarium/src/scripting",
+                "/home/tta21/Documents/work/stellarium/src/external",
+                "/home/tta21/Documents/work/stellarium/build/unix/src",
+                "/usr/include/x86_64-linux-gnu/qt5",
+                "/usr/include/x86_64-linux-gnu/qt5/QtCore",
+                "/usr/include/x86_64-linux-gnu/qt5/QtGui",
+                "/usr/include/x86_64-linux-gnu/qt5/QtWidgets",
+                "/usr/include/x86_64-linux-gnu/qt5/QtOpenGL"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/g++",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-gcc-x64",
+            "compileCommands": "${workspaceFolder}/compile_commands.json"
+        }
+    ],
+    "version": 4
+}

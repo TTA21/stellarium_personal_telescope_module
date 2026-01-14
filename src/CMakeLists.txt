@@ -14,6 +14,10 @@ SET(DynamicPluginTemplate_SRCS
      DynamicPluginTemplate.cpp
      gui/DynamicPluginTemplateWindow.cpp
      gui/DynamicPluginTemplateWindow.hpp
+     gui/DynamicPluginSerialHelper.cpp
+     gui/DynamicPluginNudgeControls.cpp
+     gui/DynamicPluginMotorSettings.cpp
+
 )
 
 SET(DynamicPluginTemplate_UIS
@@ -33,8 +37,20 @@ QT5_WRAP_UI(DynamicPluginTemplate_UIS_H ${DynamicPluginTemplate_UIS})
 # QT5_ADD_RESOURCES(DynamicPluginTemplate_RES_CXX ${DynamicPluginTemplate_RES})
 
 # Library properties
-ADD_LIBRARY(DynamicPluginTemplate-dynamic MODULE ${DynamicPluginTemplate_SRCS} ${DynamicPluginTemplate_RES_SXX} ${DynamicPluginTemplate_UIS_H})
-TARGET_LINK_LIBRARIES(DynamicPluginTemplate-dynamic Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL)
+ADD_LIBRARY(DynamicPluginTemplate-dynamic MODULE ${DynamicPluginTemplate_SRCS} ${DynamicPluginTemplate_RES_SXX} ${DynamicPluginTemplate_UIS_H}
+     gui/DynamicPluginSerialHelper.cpp
+     gui/DynamicPluginNudgeControls.cpp
+     gui/DynamicPluginMotorSettings.cpp
+)
+
+TARGET_LINK_LIBRARIES(
+     DynamicPluginTemplate-dynamic
+     Qt5::Core Qt5::Gui
+     Qt5::Widgets
+     Qt5::OpenGL
+     Qt5::SerialPort
+     ${LIBVLC_LIBRARIES}
+)
 SET_TARGET_PROPERTIES(DynamicPluginTemplate-dynamic PROPERTIES OUTPUT_NAME "${PROJECT_NAME}")
 SET_TARGET_PROPERTIES(DynamicPluginTemplate-dynamic PROPERTIES COMPILE_FLAGS "-DQT_DYNAMICPLUGIN")
 SET_TARGET_PROPERTIES(DynamicPluginTemplate-dynamic PROPERTIES AUTOMOC TRUE)
