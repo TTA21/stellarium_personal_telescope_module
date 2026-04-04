@@ -38,7 +38,11 @@ void DynamicPluginTemplateWindow::handleSerialRead()
     ui->serialTerminalTextBrowser->append("<font color='cyan'>RX: " + text + "</font>");
     moveTerminalScrollToBottom();
 
-    QStringList lines = text.split("\r\n", QString::SkipEmptyParts);
+    #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+        QStringList lines = text.split("\r\n", Qt::SkipEmptyParts);
+    #else
+        QStringList lines = text.split("\r\n", QString::SkipEmptyParts);
+    #endif
 
     for (const QString& line : lines) {
 

@@ -1,0 +1,2 @@
+set(__QT_DEPLOY_TARGET_DynamicPluginTemplate-dynamic_FILE /home/tta21/Documents/stellarium_personal_telescope_module/build/unix/src/libDynamicPluginTemplate.so)
+set(__QT_DEPLOY_TARGET_DynamicPluginTemplate-dynamic_TYPE MODULE_LIBRARY)

@@ -1,0 +1,15 @@
+/home/tta21/Documents/stellarium_personal_telescope_module/build/unix/CMakeFiles/edit_cache.dir
+/home/tta21/Documents/stellarium_personal_telescope_module/build/unix/CMakeFiles/rebuild_cache.dir
+/home/tta21/Documents/stellarium_personal_telescope_module/build/unix/CMakeFiles/list_install_components.dir
+/home/tta21/Documents/stellarium_personal_telescope_module/build/unix/CMakeFiles/install.dir
+/home/tta21/Documents/stellarium_personal_telescope_module/build/unix/CMakeFiles/install/local.dir
+/home/tta21/Documents/stellarium_personal_telescope_module/build/unix/CMakeFiles/install/strip.dir
+/home/tta21/Documents/stellarium_personal_telescope_module/build/unix/src/CMakeFiles/DynamicPluginTemplate-dynamic.dir
+/home/tta21/Documents/stellarium_personal_telescope_module/build/unix/src/CMakeFiles/edit_cache.dir
+/home/tta21/Documents/stellarium_personal_telescope_module/build/unix/src/CMakeFiles/rebuild_cache.dir
+/home/tta21/Documents/stellarium_personal_telescope_module/build/unix/src/CMakeFiles/list_install_components.dir
+/home/tta21/Documents/stellarium_personal_telescope_module/build/unix/src/CMakeFiles/install.dir
+/home/tta21/Documents/stellarium_personal_telescope_module/build/unix/src/CMakeFiles/install/local.dir
+/home/tta21/Documents/stellarium_personal_telescope_module/build/unix/src/CMakeFiles/install/strip.dir
+/home/tta21/Documents/stellarium_personal_telescope_module/build/unix/src/CMakeFiles/DynamicPluginTemplate-dynamic_autogen_timestamp_deps.dir
+/home/tta21/Documents/stellarium_personal_telescope_module/build/unix/src/CMakeFiles/DynamicPluginTemplate-dynamic_autogen.dir

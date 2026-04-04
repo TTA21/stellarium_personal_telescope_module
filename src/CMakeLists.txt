@@ -31,7 +31,7 @@ SET(DynamicPluginTemplate_RES_SXX
 )
 
 # Wrapping UI
-QT5_WRAP_UI(DynamicPluginTemplate_UIS_H ${DynamicPluginTemplate_UIS})
+QT6_WRAP_UI(DynamicPluginTemplate_UIS_H ${DynamicPluginTemplate_UIS})
 
 # compiles resources files
 # QT5_ADD_RESOURCES(DynamicPluginTemplate_RES_CXX ${DynamicPluginTemplate_RES})
@@ -45,10 +45,10 @@ ADD_LIBRARY(DynamicPluginTemplate-dynamic MODULE ${DynamicPluginTemplate_SRCS} $
 
 TARGET_LINK_LIBRARIES(
      DynamicPluginTemplate-dynamic
-     Qt5::Core Qt5::Gui
-     Qt5::Widgets
-     Qt5::OpenGL
-     Qt5::SerialPort
+     Qt6::Core Qt6::Gui
+     Qt6::Widgets
+     Qt6::OpenGL
+     Qt6::SerialPort
      ${LIBVLC_LIBRARIES}
 )
 SET_TARGET_PROPERTIES(DynamicPluginTemplate-dynamic PROPERTIES OUTPUT_NAME "${PROJECT_NAME}")
