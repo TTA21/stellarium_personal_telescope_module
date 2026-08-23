@@ -8,4 +8,12 @@ The module sends strings to the esp32, it has a control panel that sets configur
 
 Dont forget to put in your bashrc:
 
-export STELROOT=/path/to/stellarium
+export STELROOT=/home/tta21/Documents/stellarium
+
+To build:
+
+rm -rf ~/your_path/stellarium_personal_telescope_module/build
+mkdir -p ~/your_path/stellarium_personal_telescope_module/build/unix
+cd ~/your_path/stellarium_personal_telescope_module/build/unix
+cmake ../..
+make -j$(nproc)
