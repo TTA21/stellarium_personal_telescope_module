@@ -1,1 +1,0 @@
-/home/tta21/.stellarium/modules/DynamicPluginTemplate/libDynamicPluginTemplate.so

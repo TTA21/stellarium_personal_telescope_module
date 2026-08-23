@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'dynamicPluginTemplateWindow.ui'
 **
-** Created by: Qt User Interface Compiler version 6.11.0
+** Created by: Qt User Interface Compiler version 6.11.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -24,18 +24,14 @@
 #include <QtWidgets/QTextBrowser>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
+#include "Dialog.hpp"
 
 QT_BEGIN_NAMESPACE
 
 class Ui_dynamicPluginTemplateWindowForm
 {
 public:
-    QFrame *TitleBar;
-    QHBoxLayout *hboxLayout;
-    QSpacerItem *leftSpacer;
-    QLabel *stelWindowTitle;
-    QSpacerItem *rightSpacer;
-    QPushButton *closeStelWindow;
+    TitleBar *titleBar;
     QTabWidget *tabWidget;
     QWidget *tab;
     QWidget *gridLayoutWidget_2;
@@ -127,45 +123,9 @@ public:
         dynamicPluginTemplateWindowForm->resize(793, 439);
         dynamicPluginTemplateWindowForm->setMinimumSize(QSize(793, 439));
         dynamicPluginTemplateWindowForm->setMaximumSize(QSize(793, 439));
-        TitleBar = new QFrame(dynamicPluginTemplateWindowForm);
-        TitleBar->setObjectName("TitleBar");
-        TitleBar->setGeometry(QRect(0, 0, 791, 25));
-        QSizePolicy sizePolicy(QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
-        sizePolicy.setHorizontalStretch(0);
-        sizePolicy.setVerticalStretch(0);
-        sizePolicy.setHeightForWidth(TitleBar->sizePolicy().hasHeightForWidth());
-        TitleBar->setSizePolicy(sizePolicy);
-        TitleBar->setMinimumSize(QSize(0, 25));
-        TitleBar->setMaximumSize(QSize(16777215, 30));
-        TitleBar->setFocusPolicy(Qt::FocusPolicy::NoFocus);
-        TitleBar->setAutoFillBackground(false);
-        TitleBar->setFrameShape(QFrame::Shape::StyledPanel);
-        hboxLayout = new QHBoxLayout(TitleBar);
-        hboxLayout->setSpacing(6);
-        hboxLayout->setContentsMargins(11, 11, 11, 11);
-        hboxLayout->setObjectName("hboxLayout");
-        hboxLayout->setContentsMargins(0, 0, 4, 0);
-        leftSpacer = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
-
-        hboxLayout->addItem(leftSpacer);
-
-        stelWindowTitle = new QLabel(TitleBar);
-        stelWindowTitle->setObjectName("stelWindowTitle");
-
-        hboxLayout->addWidget(stelWindowTitle);
-
-        rightSpacer = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
-
-        hboxLayout->addItem(rightSpacer);
-
-        closeStelWindow = new QPushButton(TitleBar);
-        closeStelWindow->setObjectName("closeStelWindow");
-        closeStelWindow->setMinimumSize(QSize(16, 16));
-        closeStelWindow->setMaximumSize(QSize(16, 16));
-        closeStelWindow->setFocusPolicy(Qt::FocusPolicy::NoFocus);
-
-        hboxLayout->addWidget(closeStelWindow);
-
+        titleBar = new TitleBar(dynamicPluginTemplateWindowForm);
+        titleBar->setObjectName("titleBar");
+        titleBar->setGeometry(QRect(0, 0, 791, 25));
         tabWidget = new QTabWidget(dynamicPluginTemplateWindowForm);
         tabWidget->setObjectName("tabWidget");
         tabWidget->setGeometry(QRect(10, 30, 771, 401));
@@ -617,8 +577,7 @@ public:
     void retranslateUi(QWidget *dynamicPluginTemplateWindowForm)
     {
         dynamicPluginTemplateWindowForm->setWindowTitle(QCoreApplication::translate("dynamicPluginTemplateWindowForm", "Dialog", nullptr));
-        stelWindowTitle->setText(QCoreApplication::translate("dynamicPluginTemplateWindowForm", "Serial Telescope Control", nullptr));
-        closeStelWindow->setText(QString());
+        titleBar->setTitle(QCoreApplication::translate("dynamicPluginTemplateWindowForm", "Serial Telescope Control", nullptr));
         label->setText(QCoreApplication::translate("dynamicPluginTemplateWindowForm", "Objective:", nullptr));
         buttonFRotCCW->setText(QCoreApplication::translate("dynamicPluginTemplateWindowForm", "FRot CCW", nullptr));
         buttonNudgeLeft->setText(QCoreApplication::translate("dynamicPluginTemplateWindowForm", "Left", nullptr));

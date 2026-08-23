@@ -26,12 +26,15 @@
 #include "StelLocaleMgr.hpp"
 #include "StelModuleMgr.hpp"
 
+#include <QThread>
+
 //ffplay -fflags nobuffer -vf "drawbox=x=(iw-1)/2:y=0:w=1:h=ih:color=red:t=fill,drawbox=x=0:y=(ih-1)/2:w=iw:h=1:color=red:t=fill" -an -x 600 -y 400 rtsp://192.168.59.1:7070/webcam
 
 DynamicPluginTemplateWindow::DynamicPluginTemplateWindow():
     nudgeValue(0.1),
     isConnectedToSerialPort(false),
     serial(nullptr),
+    uiDestroyed(false),
     isTracking(false),
     sensorAlt(0),
     sensorAz(0),
@@ -97,14 +100,38 @@ DynamicPluginTemplateWindow::DynamicPluginTemplateWindow():
     connect(coordinateTimer, &QTimer::timeout, this, &DynamicPluginTemplateWindow::tick);
     connect(coordinateTimerInternal, &QTimer::timeout, this, &DynamicPluginTemplateWindow::tickInternal);
 
+    // Create the port up-front and wire its signals exactly once.
+    // (Previously the port was created lazily inside the connect button and
+    // re-connected on every open, entangling the signal lifecycle with the UI.)
+    serial = new QSerialPort(this);
+    connect(serial, &QSerialPort::readyRead, this, &DynamicPluginTemplateWindow::handleSerialRead);
+    connect(serial, &QSerialPort::errorOccurred, this, &DynamicPluginTemplateWindow::handleSerialError);
 }
 
 DynamicPluginTemplateWindow::~DynamicPluginTemplateWindow()
 {
+    // Mark destroyed FIRST: QSerialPort is a child of this window and can
+    // emit errorOccurred/readyRead while Qt tears it down (especially after
+    // a USB drop or while Stellarium is quitting). Any such signal must not
+    // touch the UI we are about to free.
+    uiDestroyed = true;
+
     coordinateTimer->stop();
     coordinateTimerInternal->stop();
+
+    if (serial) {
+        serial->disconnect(this);   // only signals FROM the port to this window
+        if (serial->isOpen()) {
+            serial->clear();
+            serial->close();
+        }
+        // serial is a child of this window; Qt deletes it with us.
+    }
+
     delete ui;
+    ui = nullptr;
 }
+
 void DynamicPluginTemplateWindow::retranslate()
 {
 	if (dialog)
@@ -143,6 +170,8 @@ void DynamicPluginTemplateWindow::createDialogContent()
     connect(ui->listSerialPortsButton, SIGNAL(clicked()), this, SLOT(on_listSerialPortsButton_clicked()));
     connect(ui->buttonConnectSerial, SIGNAL(clicked()), this, SLOT(on_buttonConnectSerial_clicked()));
     connect(ui->buttonTerminalSend, SIGNAL(clicked()), this, SLOT(on_buttonTerminalSend_clicked()));
+    // Allow Enter in the input field to send, like a normal terminal
+    connect(ui->terminalSendLineEdit, SIGNAL(returnPressed()), this, SLOT(on_buttonTerminalSend_clicked()));
     connect(ui->buttonClearTerminal, SIGNAL(clicked()), this, SLOT(on_buttonClearTerminal_clicked()));
 
     //tab3
@@ -155,12 +184,38 @@ void DynamicPluginTemplateWindow::createDialogContent()
     connect(ui->settingsPresetComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(on_settingsPresetComboBox_currentIndexChanged(int)));
     connect(ui->deletePresetPushButton, SIGNAL(clicked()), this, SLOT(on_deletePresetPushButton_clicked()));
 
-	connect(ui->closeStelWindow, SIGNAL(clicked()), this, SLOT(close()));
+	// Title bar: close button + drag-to-move (standard StelDialog pattern).
+	// movedTo saves the window position to config.ini like all other plugins.
+	connect(ui->titleBar, &TitleBar::closeClicked, this, &StelDialog::close);
+	connect(ui->titleBar, &TitleBar::movedTo, this, &StelDialog::handleMovedTo);
 
     coordinateTimerInternal->start(30);
 
 }
 
+
+void DynamicPluginTemplateWindow::refreshSerialPortList(void)
+{
+    // Clear existing items
+    ui->serialPortComboBox->clear();
+
+    // Get available ports
+    QList<QSerialPortInfo> ports = QSerialPortInfo::availablePorts();
+
+    // Add each port to the combo box
+    for (const QSerialPortInfo &port : ports) {
+        qDebug() << "Port:" << port.portName() << port.description();
+        ui->serialPortComboBox->addItem(port.portName());
+    }
+
+    // Optional: Show message if no ports found
+    if (ports.isEmpty()) {
+        qDebug() << "No serial ports found";
+        ui->serialTerminalTextBrowser->append("<font color='red'>No serial terminals found</font>");
+    }
+
+    moveTerminalScrollToBottom();
+}
 
 void DynamicPluginTemplateWindow::on_listSerialPortsButton_clicked(void)
 {
@@ -171,29 +226,8 @@ void DynamicPluginTemplateWindow::on_listSerialPortsButton_clicked(void)
         return;
     }
 
-    // Clear existing items
-    ui->serialPortComboBox->clear();
-
-    // Get available ports
-    QList<QSerialPortInfo> ports = QSerialPortInfo::availablePorts();
-
-    // Add each port to the combo box
     ui->serialTerminalTextBrowser->append("<font color='blue'>Searching for serial terminals</font>");
-    for (const QSerialPortInfo &port : ports) {
-        qDebug() << "Port:" << port.portName() << port.description();
-        ui->serialPortComboBox->addItem(port.portName());
-
-        ui->serialTerminalTextBrowser->append("<font color='blue'>Found: " + port.portName() + " - " + port.description() + "</font>");
-    }
-
-    // Optional: Show message if no ports found
-    if (ports.isEmpty()) {
-        //ui->serialPortComboBox->addItem("No ports available");
-        qDebug() << "No serial ports found";
-        ui->serialTerminalTextBrowser->append("<font color='red'>No serial terminals found</font>");
-    }
-
-    moveTerminalScrollToBottom();
+    refreshSerialPortList();
 }
 
 
@@ -202,26 +236,28 @@ void DynamicPluginTemplateWindow::on_buttonConnectSerial_clicked(void)
     qDebug() << "Serial Port Connect Button Clicked";
 
     if(isConnectedToSerialPort){
-        serial->close();
-        isConnectedToSerialPort = false;
-        ui->buttonConnectSerial->setText("Connect");
-        ui->serialTerminalTextBrowser->append("<font color='blue'>Disconnected </font>");
+        // Manual disconnect: same centralized teardown as an error, but a
+        // neutral (non-error) message.
+        handleDisconnection("Disconnected");
+        refreshSerialPortList();
         return;
     }
 
-    QString selectedPort = ui->serialPortComboBox->currentText();
+    if (!serial) return; // cannot happen: created in the constructor
+
+    QString selectedPort = ui->serialPortComboBox->currentText().trimmed();
+    if (selectedPort.isEmpty()) {
+        ui->serialTerminalTextBrowser->append("<font color='red'>ERROR: No serial port selected. Search for ports first.</font>");
+        moveTerminalScrollToBottom();
+        return;
+    }
 
     qDebug() << "Serial port chosen: " << selectedPort;
 
-    ui->serialTerminalTextBrowser->append("<font color='blue'>Serial port chossen: /dev/" + selectedPort + "</font>");
+    ui->serialTerminalTextBrowser->append("<font color='blue'>Serial port chosen: /dev/" + selectedPort + "</font>");
     ui->serialTerminalTextBrowser->append("<font color='blue'>Attempting Connection</font>");
 
-    if (!serial) serial = new QSerialPort(this);
-
-    // Close if already open
-    if (serial->isOpen()) serial->close();
-
-    // Configure the port
+    // Configure the port (signals were already connected once in the constructor)
     serial->setPortName("/dev/" + selectedPort);
     serial->setBaudRate(QSerialPort::Baud115200);  // Adjust as needed
     serial->setDataBits(QSerialPort::Data8);
@@ -231,13 +267,24 @@ void DynamicPluginTemplateWindow::on_buttonConnectSerial_clicked(void)
 
     // Attempt to open
     if (serial->open(QIODevice::ReadWrite)) {
+        // The ESP32's native USB-Serial-JTAG port (ttyACM0, "USB Single
+        // Serial") only starts routing host->device data after a DTR/RTS
+        // handshake. QSerialPort does not assert these lines on open, so
+        // without this the port appears connected but every command is
+        // silently dropped by the chip until it is reset. Replicate what a
+        // serial monitor does: drop the lines, then assert DTR.
+        // (RTS stays low -> if this resets the chip it boots into the app,
+        // never the download bootloader.)
+        serial->setDataTerminalReady(false);
+        serial->setRequestToSend(false);
+        QThread::msleep(100);
+        serial->setDataTerminalReady(true);
+        QThread::msleep(300);
+        serial->clear(); // discard any boot/reset output
+
         ui->buttonConnectSerial->setText("Disconnect");
         isConnectedToSerialPort = true;
         ui->serialTerminalTextBrowser->append("<font color='green'>Connected successfully!</font>");
-
-        //Asyncs
-        connect(serial, &QSerialPort::readyRead, this, &DynamicPluginTemplateWindow::handleSerialRead);
-        connect(serial, &QSerialPort::errorOccurred, this, &DynamicPluginTemplateWindow::handleSerialError);
 
         qDebug() << "Serial port opened successfully";
     } else {
@@ -265,7 +312,12 @@ void DynamicPluginTemplateWindow::on_buttonTerminalSend_clicked(void)
 
     qDebug() << message;
 
-    writeToSerial(message, true);
+    if (writeToSerial(message, true)) {
+        // Clear on success only; if the write failed keep the command so
+        // the user can resend it after reconnecting.
+        ui->terminalSendLineEdit->clear();
+        ui->terminalSendLineEdit->setFocus();
+    }
 }
 
 

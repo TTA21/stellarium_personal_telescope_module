@@ -24,6 +24,7 @@
 #include "../DynamicPluginTemplate.hpp"
 
 #include <QScrollBar>
+#include <QByteArray>
 
 #include <QSerialPort>
 #include <QSerialPortInfo>  // For listing available ports
@@ -96,6 +97,13 @@ protected:
 
     double calculateFieldRotation(StelObjectP obj, StelCore* core);
 
+    // Serial link helpers (implemented in DynamicPluginSerialHelper.cpp)
+    void handleDisconnection(const QString &reason);
+    void handleSerialLine(const QByteArray &lineBytes);
+    void processSerialError(const QString &errorString); // deferred, runs in event loop
+
+    void refreshSerialPortList();
+
 private slots:
 
     void on_buttonNudgeLeft_clicked(void);
@@ -163,7 +171,10 @@ private:
     double nudgeValue;
     bool isConnectedToSerialPort;
     QSerialPort *serial;
-    void writeToSerial(const QString &data, const bool writeToTerminal);
+    bool writeToSerial(const QString &data, const bool writeToTerminal);
+
+    bool uiDestroyed;          // set in dtor so slots never touch freed UI
+    QByteArray serialLineBuffer; // holds incomplete incoming lines between readyRead bursts
     QTimer *coordinateTimer;
     QTimer *coordinateTimerInternal;
 
